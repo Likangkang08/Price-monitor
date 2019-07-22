@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # coding=utf-8
-from proxy import Proxy
-from crawler_selenium import Crawler
-from conn_sql import Sql
-from mail import Mail
-from CONFIG import ITEM_CRAWL_TIME, Email_TIME, PROXY_CRAWL
+from PriceMonitor.proxy import Proxy
+from PriceMonitor.crawler_selenium import Crawler
+from PriceMonitor.conn_sql import Sql
+from PriceMonitor.mail import Mail
+from PriceMonitor.CONFIG import ITEM_CRAWL_TIME, Email_TIME, PROXY_CRAWL
 import logging
 import logging.config
 import time
@@ -26,7 +26,12 @@ class Entrance(object):
         return items
 
     def _item_info_update(self, item):
+        # 1.参数说明：需要传入一个item集合：从里面取出column_id、item_id
+        # 2.实例化Sql类、Proxy类
+        # 3.
+
         column_id = item['column_id']
+        #取出 item_id
         item_id = str(item['item_id'])
         sq = Sql()
         pr = Proxy()
@@ -48,6 +53,7 @@ class Entrance(object):
                         sq.update_item_max_price(column_id, huihui_info[0])
                         sq.update_item_min_price(column_id, huihui_info[1])
                     break
+        #PROXY_CRAAWL通过from导入
         elif PROXY_CRAWL == 2:
             # Using zhima proxy
             while True:
@@ -85,6 +91,7 @@ class Entrance(object):
 
             cr = Crawler()
             # huihui_info = {max_price, min_price}
+            # 访问慧慧获取商品的最高价格和平均价格。
             huihui_info = cr.get_huihui_item(item_id)
             if huihui_info:
                 sq.update_item_max_price(column_id, huihui_info['max_price'])

@@ -5,7 +5,7 @@ import logging
 from json import decoder
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException,NoSuchWindowException
 from selenium.webdriver.chrome.options import Options
 import time
 import json
@@ -16,8 +16,9 @@ class Crawler(object):
     def __init__(self, proxy=None):
         chrome_options = Options()
         # chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-gpu')
-        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-gpu') #关闭硬件加速器
+        chrome_options.add_argument('--no-sandbox') #取消沙盒模式
+        chrome_options.add_argument('--start-maximized ')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--ignore-certificate-errors')
         chrome_options.add_argument('--ignore-ssl-errors')
@@ -37,16 +38,27 @@ class Crawler(object):
         self.chrome.set_script_timeout(20)
 
     def get_jd_item(self, item_id):
+        # 这个方法的功能：
+        #                参数说明：itme_id 是要爬取京东网页的后三位。
+        #                1.主要是爬取商品的名字、价格、会员价格、标题
+        #                2.再将获取到的内容添加到一个集合中
+        #                3.返回这个集合。
         item_info_dict = {"name": None, "price": None, "plus_price": None, "subtitle": None}
+        #变量url
         url = 'https://item.jd.com/' + item_id + '.html'
+
         try:
             self.chrome.get(url)
         except TimeoutException as e:
             logging.warning('Crawl failure: {}'.format(e))
             return item_info_dict
+        except NoSuchWindowException as e:
+            logging.warning('Crawl failure: {}'.format(e))
+            return  item_info_dict
 
         # 提取商品名称
         try:
+            #获取商品名称并且储存到集合
             name = self.chrome.find_element_by_xpath("//*[@class='sku-name']").text
             item_info_dict['name'] = name
         except AttributeError as e:
