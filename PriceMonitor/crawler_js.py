@@ -13,7 +13,7 @@ class Crawler(object):
         url = 'https://zhushou.huihui.cn/productSense?phu=https://item.jd.com/' + item_id + '.html'
         logging.debug('Ready to crawl huihui price URL：%s', url)
         try:
-            if proxy:  # Using proxy
+            if proxy:  # Using proxy1
                 proxies = proxy
                 r = requests.get(url, headers=header, proxies=proxies, timeout=5)
             else:  # Not using proxy
